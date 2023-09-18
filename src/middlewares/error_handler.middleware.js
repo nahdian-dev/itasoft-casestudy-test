@@ -15,8 +15,9 @@ const errorHandler = (err, req, res, next) => {
     let { statusCode, message } = err;
 
     const response = {
-        code: statusCode,
-        message: message,
+        is_success: false,
+        status_code: statusCode,
+        remark: message,
         stack: err.stack
     };
 

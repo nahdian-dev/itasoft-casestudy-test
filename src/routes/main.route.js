@@ -4,6 +4,6 @@ const MainController = require("../controllers/main.controller");
 // Instance
 const router = express.Router();
 
-router.get("/", MainController.main);
+router.post("/daftar", MainController.daftar);
 
 module.exports = router;

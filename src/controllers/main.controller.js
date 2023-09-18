@@ -77,7 +77,6 @@ const tabung = (req, res) => {
     }
 
     // CHECK NO REKENING
-    let currentSaldo = 0;
     const customerPath = path.join('src', 'data', 'customers.json');
     const customers = JSON.parse(fs.readFileSync(customerPath));
     const isREKExists = customers.some(item => item.no_rekening === value.no_rekening);
@@ -87,13 +86,14 @@ const tabung = (req, res) => {
     }
 
     // UPDATE NOMINAL
+    let currentSaldo = 0;
     for (let index = 0; index < customers.length; index++) {
         if (customers[index].no_rekening === value.no_rekening) {
             customers[index].nominal += value.nominal;
             const updateNominal = JSON.stringify(customers, null, 2);
 
             fs.writeFileSync(customerPath, updateNominal);
-            currentSaldo += customers[index].nominal;
+            currentSaldo = customers[index].nominal;
         }
     }
 
@@ -105,4 +105,51 @@ const tabung = (req, res) => {
     });
 }
 
-module.exports = { daftar, tabung };
+
+const tarik = (req, res) => {
+    // VALIDASI BODY
+    const schema = Joi.object({
+        no_rekening: Joi.string().required(),
+        nominal: Joi.number().required()
+    });
+
+    const { error, value } = schema.validate(req.body);
+
+    if (error) {
+        throw new CustomApiError(400, `Terjadi Error ketika validasi body: ${error.details[0].message}`)
+    }
+
+    // CHECK NO REKENING
+    const customerPath = path.join('src', 'data', 'customers.json');
+    const customers = JSON.parse(fs.readFileSync(customerPath));
+    const isREKExists = customers.some(item => item.no_rekening === value.no_rekening);
+
+    if (!isREKExists) {
+        throw new CustomApiError(400, 'Nomor Rekening Tidak Terdaftar!');
+    }
+
+    // UPDATE NOMINAL
+    let currentSaldo = 0;
+
+    for (let index = 0; index < customers.length; index++) {
+        if (customers[index].no_rekening === value.no_rekening) {
+            if (customers[index].nominal < value.nominal) {
+                throw new CustomApiError(400, 'Saldo tidak cukup!');
+            }
+            customers[index].nominal -= value.nominal;
+            const updateNominal = JSON.stringify(customers, null, 2);
+
+            fs.writeFileSync(customerPath, updateNominal);
+            currentSaldo = customers[index].nominal;
+        }
+    }
+
+    // RESPONSE
+    res.status(200).json({
+        is_success: true,
+        status_code: 200,
+        saldo: currentSaldo
+    });
+}
+
+module.exports = { daftar, tabung, tarik };

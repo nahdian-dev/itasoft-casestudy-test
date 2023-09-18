@@ -6,5 +6,6 @@ const router = express.Router();
 
 router.post("/daftar", MainController.daftar);
 router.post("/tabung", MainController.tabung);
+router.post("/tarik", MainController.tarik);
 
 module.exports = router;

@@ -5,5 +5,6 @@ const MainController = require("../controllers/main.controller");
 const router = express.Router();
 
 router.post("/daftar", MainController.daftar);
+router.post("/tabung", MainController.tabung);
 
 module.exports = router;

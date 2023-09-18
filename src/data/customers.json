@@ -1,16 +1,18 @@
 [
   {
-    "id": "5e850e26-7536-408c-8441-19ea4ca90e3c",
-    "nama": "Ahmad Saipudin",
-    "nik": "1234567890123456",
-    "phone": "82113999019",
-    "rekening_number": "5633445746"
-  },
-  {
-    "id": "bcdc4d0b-1abf-4580-a39b-e3b0ccb31729",
+    "id": "e163b8b3-3a54-4321-915f-440708ae23b4",
     "nama": "Ahmad Saipullah",
     "nik": "1234567891011121",
     "phone": "86788732672",
-    "rekening_number": "1927622775"
+    "no_rekening": "5914442340",
+    "nominal": 2000
+  },
+  {
+    "id": "f8e7a951-7126-41a6-bd84-35bdb3e929ec",
+    "nama": "Freya",
+    "nik": "1234567891011122",
+    "phone": "86788732674",
+    "no_rekening": "2557357195",
+    "nominal": 104000
   }
 ]

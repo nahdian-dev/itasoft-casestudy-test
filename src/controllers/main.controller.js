@@ -5,6 +5,7 @@ const { v4: uuidv4 } = require('uuid');
 
 const CustomApiError = require('../utilities/CustomApiError');
 const rekeningUtility = require('../utilities/rekening.utility');
+const dateUtility = require('../utilities/date.utility');
 
 const daftar = (req, res) => {
     // VALIDASI BODY
@@ -97,6 +98,31 @@ const tabung = (req, res) => {
         }
     }
 
+    //CREATE MUTASI
+    const mutasiPath = path.join('src', 'data', 'mutasi.json');
+    const mutasi = JSON.parse(fs.readFileSync(mutasiPath));
+
+    const mutasiDetail = {
+        waktu: dateUtility.dateTimeNow(),
+        kode_transaksi: "C",
+        nominal: currentSaldo
+    }
+
+    const mutasiData = {
+        no_rekening: value.no_rekening,
+        mutasi: [mutasiDetail]
+    }
+
+    const isCusMutasiExists = mutasi.find(item => item.no_rekening === value.no_rekening);
+
+    if (!isCusMutasiExists) {
+        mutasi.push(mutasiData);
+        fs.writeFileSync(mutasiPath, JSON.stringify(mutasi));
+    } else {
+        isCusMutasiExists.mutasi.push(mutasiDetail);
+        fs.writeFileSync(mutasiPath, JSON.stringify(mutasi));
+    }
+
     // RESPONSE
     res.status(200).json({
         is_success: true,
@@ -144,6 +170,31 @@ const tarik = (req, res) => {
         }
     }
 
+    //CREATE MUTASI
+    const mutasiPath = path.join('src', 'data', 'mutasi.json');
+    const mutasi = JSON.parse(fs.readFileSync(mutasiPath));
+
+    const mutasiDetail = {
+        waktu: dateUtility.dateTimeNow(),
+        kode_transaksi: "D",
+        nominal: currentSaldo
+    }
+
+    const mutasiData = {
+        no_rekening: value.no_rekening,
+        mutasi: [mutasiDetail]
+    }
+
+    const isCusMutasiExists = mutasi.find(item => item.no_rekening === value.no_rekening);
+
+    if (!isCusMutasiExists) {
+        mutasi.push(mutasiData);
+        fs.writeFileSync(mutasiPath, JSON.stringify([mutasiData]));
+    } else {
+        isCusMutasiExists.mutasi.push(mutasiDetail);
+        fs.writeFileSync(mutasiPath, JSON.stringify(mutasi));
+    }
+
     // RESPONSE
     res.status(200).json({
         is_success: true,
@@ -179,4 +230,34 @@ const saldo = (req, res) => {
     });
 }
 
-module.exports = { daftar, tabung, tarik, saldo };
+const mutasi = (req, res) => {
+    // CHECK NO REKENING
+    const customerPath = path.join('src', 'data', 'customers.json');
+    const customers = JSON.parse(fs.readFileSync(customerPath));
+    const isREKExists = customers.some(item => item.no_rekening === req.params.no_rekening);
+
+    if (!isREKExists) {
+        throw new CustomApiError(400, 'Nomor Rekening Tidak Terdaftar!');
+    }
+
+    // GET LIST MUTASI
+    const mutasiPath = path.join('src', 'data', 'mutasi.json');
+    const mutasi = JSON.parse(fs.readFileSync(mutasiPath));
+    const isCusMutasiExists = mutasi.find(item => item.no_rekening === req.params.no_rekening);
+
+    if (!isCusMutasiExists) {
+        res.status(200).json({
+            is_success: true,
+            status_code: 200,
+            mutasi: "Belum ada riwayat transaksi!"
+        });
+    }
+
+    // RESPONSE
+    res.status(200).json({
+        is_success: true,
+        status_code: 200,
+        mutasi: isCusMutasiExists.mutasi
+    });
+}
+module.exports = { daftar, tabung, tarik, saldo, mutasi };

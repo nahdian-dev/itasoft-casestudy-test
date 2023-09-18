@@ -152,4 +152,31 @@ const tarik = (req, res) => {
     });
 }
 
-module.exports = { daftar, tabung, tarik };
+const saldo = (req, res) => {
+    // CHECK NO REKENING
+    const customerPath = path.join('src', 'data', 'customers.json');
+    const customers = JSON.parse(fs.readFileSync(customerPath));
+    const isREKExists = customers.some(item => item.no_rekening === req.params.no_rekening);
+
+    if (!isREKExists) {
+        throw new CustomApiError(400, 'Nomor Rekening Tidak Terdaftar!');
+    }
+
+    // UPDATE NOMINAL
+    let currentSaldo = 0;
+
+    for (let index = 0; index < customers.length; index++) {
+        if (customers[index].no_rekening === req.params.no_rekening) {
+            currentSaldo = customers[index].nominal;
+        }
+    }
+
+    // RESPONSE
+    res.status(200).json({
+        is_success: true,
+        status_code: 200,
+        saldo: currentSaldo
+    });
+}
+
+module.exports = { daftar, tabung, tarik, saldo };
